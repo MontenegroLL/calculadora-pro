@@ -94,8 +94,7 @@
                     <table id="resultsTable" class="min-w-full bg-white rounded-lg shadow-lg">
                        <thead class="bg-gray-200">
                             <tr>
-                                <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Investimento</th>
-                                <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Detalhes Educacionais</th>
+                                <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Investimento e Detalhes</th>
                                 <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Projeção do Período</th>
                             </tr>
                         </thead>
@@ -331,19 +330,17 @@
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50';
                 row.innerHTML = `
-                    <td class="p-4 align-top w-1/4">
-                        <div class="font-bold text-lg" style="color: ${inv.color};">${inv.nome}</div>
-                        <div class="text-sm text-gray-500">${inv.tipo}</div>
-                    </td>
-                    <td class="p-4 text-sm align-top w-1/2">
-                        <p class="mb-2">${inv.descricao}</p>
-                        <ul class="list-disc pl-5 space-y-1">
+                    <td class="p-4 align-top w-1/2">
+                        <div class="font-bold text-lg mb-2" style="color: ${inv.color};">${inv.nome}</div>
+                        <div class="text-sm text-gray-500 mb-4">${inv.tipo}</div>
+                        <p class="mb-2 text-sm">${inv.descricao}</p>
+                        <ul class="list-disc pl-5 space-y-1 text-sm">
                             <li><strong class="font-semibold text-green-700">Vantagens:</strong> ${inv.vantagens}</li>
                             <li><strong class="font-semibold text-red-700">Desvantagens:</strong> <span class="text-red-600">${inv.desvantagens}</span></li>
                         </ul>
                     </td>
-                    <td class="p-4 text-sm align-top w-1/4">
-                        <div class="grid grid-cols-[auto_1fr] gap-x-2">
+                    <td class="p-4 text-sm align-top w-1/2">
+                        <div class="grid grid-cols-[auto_1fr] gap-x-4">
                             <span class="font-semibold">Rend. Líquido Total:</span> <span class="text-right font-bold text-green-700">${formatCurrency(rendimentoLiquido)}</span>
                             <span class="font-semibold text-red-700">Imposto (IR):</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(impostoDevido)}</span>
                             <span class="font-semibold text-red-700">Taxa Adm./Custódia:</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(taxaAdmValor)}</span>
@@ -404,28 +401,16 @@
         
         calcularBtn.addEventListener('click', calcularInvestimentos);
         
-        function syncAndUpdate(sourceSet, targetSet, value) {
-            targetSet.forEach(radio => {
-                if (radio.value === value) {
-                    radio.checked = true;
-                }
-            });
+        function syncAndUpdate(value) {
+            topPeriodFilters.forEach(radio => radio.checked = radio.value === value);
+            bottomPeriodFilters.forEach(radio => radio.checked = radio.value === value);
             if (fullResults.length > 0) {
                 updateDisplay(value);
             }
         }
         
-        topPeriodFilters.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                syncAndUpdate(topPeriodFilters, bottomPeriodFilters, e.target.value);
-            });
-        });
-
-        bottomPeriodFilters.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                syncAndUpdate(bottomPeriodFilters, topPeriodFilters, e.target.value);
-            });
-        });
+        topPeriodFilters.forEach(radio => radio.addEventListener('change', (e) => syncAndUpdate(e.target.value)));
+        bottomPeriodFilters.forEach(radio => radio.addEventListener('change', (e) => syncAndUpdate(e.target.value)));
         
         closeInstructionBtn.addEventListener('click', () => {
             instructionBox.style.display = 'none';
