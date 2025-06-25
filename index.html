@@ -18,15 +18,6 @@
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             #chart-container, #chart-disclaimer, .period-selector { display: none !important; }
         }
-        /* Melhoria de acessibilidade focus */
-        input:focus, button:focus, select:focus, textarea:focus {
-            outline: 2px solid #2563eb;
-            outline-offset: 2px;
-        }
-        /* Melhoria no hover dos radios customizados */
-        .period-selector label:hover {
-            background-color: #e0e7ff;
-        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -39,7 +30,7 @@
         </header>
 
         <!-- Seção de Instruções -->
-        <div id="instruction-box" class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mb-8 relative no-print" role="alert" tabindex="0">
+        <div id="instruction-box" class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md mb-8 relative no-print" role="alert">
             <div class="flex">
                 <div class="py-1"><svg class="fill-current h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zM9 5v6h2V5H9zm0 8v2h2v-2H9z"/></svg></div>
                 <div>
@@ -52,7 +43,7 @@
                     </ol>
                 </div>
             </div>
-            <button id="close-instruction-btn" class="absolute top-0 bottom-0 right-0 px-4 py-3 focus:outline-none" aria-label="Fechar">
+            <button id="close-instruction-btn" class="absolute top-0 bottom-0 right-0 px-4 py-3" aria-label="Fechar">
                 <svg class="fill-current h-6 w-6 text-blue-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Fechar</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
             </button>
         </div>
@@ -65,17 +56,17 @@
                     <div class="space-y-4">
                         <div>
                              <label for="manualDate" class="block text-lg font-medium text-gray-700 mb-2">Data do Cenário:</label>
-                             <input type="date" id="manualDate" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" autocomplete="off">
+                             <input type="date" id="manualDate" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
                             <label for="valorInvestimento" class="block text-lg font-medium text-gray-700 mb-2">Valor Inicial:</label>
-                            <input type="text" id="valorInvestimento" placeholder="R$ 1.000,00" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" inputmode="numeric" autocomplete="off">
+                            <input type="text" id="valorInvestimento" placeholder="R$ 1.000,00" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        <button id="calcularBtn" class="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center transition-all" type="button">
+                        <button id="calcularBtn" class="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center transition-all">
                             <span id="btn-text">Calcular Projeção</span>
                             <svg id="btn-loader" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </button>
-                        <p id="errorMessage" class="error-message font-medium text-center" aria-live="polite"></p>
+                        <p id="errorMessage" class="error-message font-medium text-center"></p>
                     </div>
 
                     <!-- Coluna de Parâmetros -->
@@ -94,9 +85,9 @@
                 
                 <!-- Filtro de Período Redundante (Acima da Tabela) -->
                 <div id="period-filter-section-top" class="period-selector grid grid-cols-3 gap-2 text-center max-w-sm mx-auto mb-6 no-print">
-                    <input type="radio" name="period_top" id="p_mensal_top" value="mensal" class="sr-only"><label for="p_mensal_top" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Mensal</label>
-                    <input type="radio" name="period_top" id="p_trimestral_top" value="trimestral" class="sr-only"><label for="p_trimestral_top" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Trimestral</label>
-                    <input type="radio" name="period_top" id="p_anual_top" value="anual" class="sr-only" checked><label for="p_anual_top" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Anual</label>
+                    <input type="radio" name="period_top" id="p_mensal_top" value="mensal" class="sr-only"><label for="p_mensal_top" class="p-3 border rounded-lg cursor-pointer transition">Mensal</label>
+                    <input type="radio" name="period_top" id="p_trimestral_top" value="trimestral" class="sr-only"><label for="p_trimestral_top" class="p-3 border rounded-lg cursor-pointer transition">Trimestral</label>
+                    <input type="radio" name="period_top" id="p_anual_top" value="anual" class="sr-only" checked><label for="p_anual_top" class="p-3 border rounded-lg cursor-pointer transition">Anual</label>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -113,9 +104,9 @@
 
                 <!-- Filtro de Período Dinâmico (Perto do Gráfico) -->
                 <div id="period-filter-section-bottom" class="period-selector grid grid-cols-3 gap-2 text-center max-w-sm mx-auto mt-8 mb-4 no-print">
-                    <input type="radio" name="period_bottom" id="p_mensal_bottom" value="mensal" class="sr-only"><label for="p_mensal_bottom" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Mensal</label>
-                    <input type="radio" name="period_bottom" id="p_trimestral_bottom" value="trimestral" class="sr-only"><label for="p_trimestral_bottom" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Trimestral</label>
-                    <input type="radio" name="period_bottom" id="p_anual_bottom" value="anual" class="sr-only" checked><label for="p_anual_bottom" class="p-3 border rounded-lg cursor-pointer transition" tabindex="0">Anual</label>
+                    <input type="radio" name="period_bottom" id="p_mensal_bottom" value="mensal" class="sr-only"><label for="p_mensal_bottom" class="p-3 border rounded-lg cursor-pointer transition">Mensal</label>
+                    <input type="radio" name="period_bottom" id="p_trimestral_bottom" value="trimestral" class="sr-only"><label for="p_trimestral_bottom" class="p-3 border rounded-lg cursor-pointer transition">Trimestral</label>
+                    <input type="radio" name="period_bottom" id="p_anual_bottom" value="anual" class="sr-only" checked><label for="p_anual_bottom" class="p-3 border rounded-lg cursor-pointer transition">Anual</label>
                 </div>
 
                  <!-- Gráfico -->
@@ -129,8 +120,8 @@
             
             <!-- Ações -->
             <div id="actions-wrapper" class="text-center mt-8 no-print" style="display: none;">
-                <button id="imprimirBtn" class="py-3 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none">Imprimir</button>
-                <button id="recalcularBtn" class="ml-2 py-3 px-6 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none">Calcular Outro Valor</button>
+                <button id="imprimirBtn" class="py-3 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700">Imprimir</button>
+                <button id="recalcularBtn" class="ml-2 py-3 px-6 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700">Calcular Outro Valor</button>
             </div>
         </main>
 
@@ -154,11 +145,11 @@
     <script>
         // --- INÍCIO DO CÓDIGO JAVASCRIPT ---
         const investimentos = [
-            { nome: "Tesouro Selic", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.105, aliquotaIR: 0.15, taxaAdmAnual: 0.002, descricao: "Título público atrelado à Selic. Fonte: <a href='https://www.tesourodireto.com.br/' target='_blank' class='text-blue-600 hover:underline'>Tesouro Direto</a>.", vantagens: "Segurança máxima, liquidez diária.", desvantagens: "Rendimento baixo em cenários de juros baixos.", color: '#2563eb' },
-            { nome: "CDB (110% do CDI)", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.115, aliquotaIR: 0.15, taxaAdmAnual: 0.0, descricao: "Título de bancos com rendimento próximo ao CDI. Fonte: <a href='https://www.bcb.gov.br/' target='_blank' class='text-blue-600 hover:underline'>Banco Central</a>.", vantagens: "Segurança (FGC), boa rentabilidade.", desvantagens: "Rendimento varia entre bancos; pode ter carência.", color: '#16a34a' },
-            { nome: "LCI / LCA", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.095, aliquotaIR: 0.0, taxaAdmAnual: 0.0, descricao: "Lastreados nos setores imobiliário ou agronegócio. Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Isenção de IR para pessoa física.", desvantagens: "Menor liquidez e maior valor mínimo.", color: '#f97316' },
-            { nome: "Ações (Índice Bovespa)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.15, aliquotaIR: 0.15, taxaAdmAnual: 0.005, descricao: "Parte do capital de empresas listadas na bolsa. Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Alto potencial de valorização no longo prazo.", desvantagens: "Alta volatilidade e risco elevado.", color: '#9333ea' },
-            { nome: "Fundos Imobiliários (FIIs)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.12, aliquotaIR: 0.15, taxaAdmAnual: 0.005, descricao: "Fundos que investem em imóveis (shoppings, prédios, etc.). Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Renda mensal isenta de IR, diversificação.", desvantagens: "Volatilidade das cotas, risco de vacância.", color: '#e11d48' }
+            { nome: "Tesouro Selic", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.105, aliquotaIR: 0.15, taxaAdmAnual: 0.002, valorMinimo: 30, descricao: "Título público atrelado à Selic. Fonte: <a href='https://www.tesourodireto.com.br/' target='_blank' class='text-blue-600 hover:underline'>Tesouro Direto</a>.", vantagens: "Segurança máxima, liquidez diária.", desvantagens: "Rendimento baixo em cenários de juros baixos.", color: '#2563eb' },
+            { nome: "CDB (110% do CDI)", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.115, aliquotaIR: 0.15, taxaAdmAnual: 0.0, valorMinimo: 50, descricao: "Título de bancos com rendimento próximo ao CDI. Fonte: <a href='https://www.bcb.gov.br/' target='_blank' class='text-blue-600 hover:underline'>Banco Central</a>.", vantagens: "Segurança (FGC), boa rentabilidade.", desvantagens: "Rendimento varia entre bancos; pode ter carência.", color: '#16a34a' },
+            { nome: "LCI / LCA", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.095, aliquotaIR: 0.0, taxaAdmAnual: 0.0, valorMinimo: 1000, descricao: "Lastreados nos setores imobiliário ou agronegócio. Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Isenção de IR para pessoa física.", desvantagens: "Menor liquidez e maior valor mínimo.", color: '#f97316' },
+            { nome: "Ações (Índice Bovespa)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.15, aliquotaIR: 0.15, taxaAdmAnual: 0.005, valorMinimo: 100, descricao: "Parte do capital de empresas listadas na bolsa. Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Alto potencial de valorização no longo prazo.", desvantagens: "Alta volatilidade e risco elevado.", color: '#9333ea' },
+            { nome: "Fundos Imobiliários (FIIs)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.12, aliquotaIR: 0.15, taxaAdmAnual: 0.005, valorMinimo: 100, descricao: "Fundos que investem em imóveis (shoppings, prédios, etc.). Fonte: <a href='https://www.b3.com.br/pt_br/' target='_blank' class='text-blue-600 hover:underline'>B3</a>.", vantagens: "Renda mensal isenta de IR, diversificação.", desvantagens: "Volatilidade das cotas, risco de vacância.", color: '#e11d48' }
         ];
 
         // Mapeamento de DOM e Variáveis Globais
@@ -181,12 +172,12 @@
         const topPeriodFilters = document.querySelectorAll('input[name="period_top"]');
         const bottomPeriodFilters = document.querySelectorAll('input[name="period_bottom"]');
         let resultsChartInstance = null;
-        let fullResults = [];
+        let fullResults = []; // Armazena todos os resultados calculados
 
         // Funções de formatação
         const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const formatDate = (date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const formatPercent = (value) => `${(value * 100).toFixed(2).replace('.',',')}%`;
+        const formatPercent = (value) => `${(value * 100).toFixed(2)}%`.replace('.',',');
         const formatVolatility = (value) => {
             const percent = (value - 1) * 100;
             const sign = percent >= 0 ? '+' : '';
@@ -216,16 +207,7 @@
         }
 
         // Funções de Display de Parâmetros
-        function updateParametersDisplay(date) {
-            let content = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Taxas de Ativos</h4><table class="min-w-full text-sm">`;
-            investimentos.forEach(inv => {
-                const volatility = getVolatilityFactor(date, inv.tipo);
-                const adjustedRate = inv.rendimentoBrutoAnual * volatility;
-                content += `<tr><td class="p-1 font-medium">${inv.nome}</td><td class="p-1 text-right">${formatVolatility(volatility)}</td><td class="p-1 text-right font-bold">${formatPercent(adjustedRate)}</td></tr>`;
-            });
-            content += '</table>';
-            infoParametersTableContainer.innerHTML = content;
-        }
+        function updateParametersDisplay(date) { /* ...código inalterado... */ }
         function updateCurrenciesDisplay(date) {
             const seed = date.getDate() * 100 + date.getMonth();
             const currencies = [
@@ -273,15 +255,15 @@
             if (valorInicial <= 0) {
                 errorMessage.textContent = "Por favor, insira um valor de investimento válido.";
                 errorMessage.style.display = 'block';
-                valorInvestimentoInput.focus();
                 return;
             }
+            
             errorMessage.style.display = 'none';
             document.getElementById('btn-text').classList.add('hidden');
             document.getElementById('btn-loader').classList.remove('hidden');
             calcularBtn.disabled = true;
 
-            await new Promise(resolve => setTimeout(resolve, 300)); // Simula carregamento
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             const calculationDate = manualDateInput.value ? new Date(manualDateInput.value + 'T00:00:00') : new Date();
             const inflacaoAnual = getSimulatedInflation(calculationDate);
@@ -289,7 +271,7 @@
             dateDisplay.innerHTML = `Cenário simulado para: <strong>${formatDate(calculationDate)}</strong>`;
             updateAllParameters(calculationDate);
             
-            fullResults = [];
+            fullResults = []; // Limpa e recalcula
             investimentos.forEach(inv => {
                 const volatility = getVolatilityFactor(calculationDate, inv.tipo);
                 const taxaBrutaAnual = inv.rendimentoBrutoAnual * volatility;
@@ -309,7 +291,7 @@
                 }
                 fullResults.push(resultData);
             });
-
+            
             // Define o estado inicial do filtro para 'anual' e atualiza a exibição
             document.getElementById('p_anual_top').checked = true;
             document.getElementById('p_anual_bottom').checked = true;
@@ -328,23 +310,51 @@
         function updateDisplay(periodKey) {
             const nomePeriodo = periodKey.charAt(0).toUpperCase() + periodKey.slice(1);
             document.getElementById('printableTitle').innerHTML = `Resultados da Simulação para o Período ${nomePeriodo}`;
-            fullResults.sort((a, b) => b[periodKey].valorFinalReal - a[periodKey].valorFinalReal);
+            const valorInicial = unformatCurrency(valorInvestimentoInput.value);
+
+            // Ordena os resultados com base no período selecionado, colocando os não atingidos no final
+            fullResults.sort((a, b) => {
+                const aAffordable = valorInicial >= a.inv.valorMinimo;
+                const bAffordable = valorInicial >= b.inv.valorMinimo;
+                const aValue = aAffordable ? a[periodKey].valorFinalReal : -Infinity;
+                const bValue = bAffordable ? b[periodKey].valorFinalReal : -Infinity;
+                return bValue - aValue;
+            });
             
             tableBody.innerHTML = '';
-            const chartLabels = [];
-            const chartDataReal = [];
-            const chartColors = [];
+            
+            const affordableResults = fullResults.filter(r => valorInicial >= r.inv.valorMinimo);
+            const chartLabels = affordableResults.map(r => r.inv.nome);
+            const chartDataReal = affordableResults.map(r => r[periodKey].valorFinalReal);
+            const chartColors = affordableResults.map(r => r.inv.color);
+
 
             fullResults.forEach(result => {
                 const { inv } = result;
-                const { valorFinalNominal, valorFinalReal, rendimentoLiquido, impostoDevido, taxaAdmValor } = result[periodKey];
-                
-                chartLabels.push(inv.nome);
-                chartDataReal.push(valorFinalReal);
-                chartColors.push(inv.color);
-
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50';
+                
+                let projectionCellHTML;
+                if(valorInicial >= inv.valorMinimo) {
+                    const { valorFinalNominal, valorFinalReal, rendimentoLiquido, impostoDevido, taxaAdmValor } = result[periodKey];
+                    projectionCellHTML = `
+                        <div class="grid grid-cols-[auto_1fr] gap-x-4">
+                            <span class="font-semibold">Rend. Líquido Total:</span> <span class="text-right font-bold text-green-700">${formatCurrency(rendimentoLiquido)}</span>
+                            <span class="font-semibold text-red-700">Imposto (IR):</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(impostoDevido)}</span>
+                            <span class="font-semibold text-red-700">Taxa Adm./Custódia:</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(taxaAdmValor)}</span>
+                            <span class="font-semibold">Valor Final (Nominal):</span> <span class="text-right font-bold text-blue-700">${formatCurrency(valorFinalNominal)}</span>
+                            <span class="font-semibold">Valor Final (Real):</span> <span class="text-right font-bold text-green-700">${formatCurrency(valorFinalReal)}</span>
+                        </div>
+                    `;
+                } else {
+                     projectionCellHTML = `
+                        <div class="h-full flex flex-col justify-center items-center text-center text-gray-500 p-4">
+                            <p class="font-bold">Valor mínimo não atingido</p>
+                            <p class="text-sm">É necessário investir pelo menos ${formatCurrency(inv.valorMinimo)}</p>
+                        </div>
+                    `;
+                }
+
                 row.innerHTML = `
                     <td class="p-4 align-top w-1/2">
                         <div class="font-bold text-lg mb-2" style="color: ${inv.color};">${inv.nome}</div>
@@ -356,22 +366,18 @@
                         </ul>
                     </td>
                     <td class="p-4 text-sm align-top w-1/2">
-                        <div class="grid grid-cols-[auto_1fr] gap-x-4">
-                            <span class="font-semibold">Rend. Líquido Total:</span> <span class="text-right font-bold text-green-700">${formatCurrency(rendimentoLiquido)}</span>
-                            <span class="font-semibold text-red-700">Imposto (IR):</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(impostoDevido)}</span>
-                            <span class="font-semibold text-red-700">Taxa Adm./Custódia:</span> <span class="text-right font-bold text-red-700">- ${formatCurrency(taxaAdmValor)}</span>
-                            <span class="font-semibold">Valor Final (Nominal):</span> <span class="text-right font-bold text-blue-700">${formatCurrency(valorFinalNominal)}</span>
-                            <span class="font-semibold">Valor Final (Real):</span> <span class="text-right font-bold text-green-700">${formatCurrency(valorFinalReal)}</span>
-                        </div>
+                        ${projectionCellHTML}
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
+            
             renderChart(chartLabels, chartDataReal, chartColors, nomePeriodo);
         }
         
         function renderChart(labels, realData, colors, nomePeriodo) {
             if (resultsChartInstance) resultsChartInstance.destroy();
+            
             const ctx = chartCanvas.getContext('2d');
             resultsChartInstance = new Chart(ctx, {
                 type: 'bar',
@@ -398,11 +404,7 @@
         }
 
         // Inicialização e Eventos
-        function setInitialDateAndFooter() {
-            const today = new Date();
-            manualDateInput.value = today.toISOString().split('T')[0];
-            dateDisplay.innerHTML = `Cenário de hoje, <strong>${formatDate(today)}</strong>. Preencha os campos para simular.`;
-        }
+        function setInitialDateAndFooter() { /* ...código inalterado... */ }
         window.onload = setInitialDateAndFooter;
         valorInvestimentoInput.addEventListener('input', (e) => e.target.value = formatInputAsCurrency(e.target.value));
         manualDateInput.addEventListener('input', (e) => {
@@ -418,14 +420,7 @@
         });
         
         calcularBtn.addEventListener('click', calcularInvestimentos);
-
-        // Acessibilidade: permitir Enter acionar cálculo no input do valor
-        valorInvestimentoInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                calcularInvestimentos();
-            }
-        });
-
+        
         function syncAndUpdate(value) {
             topPeriodFilters.forEach(radio => radio.checked = radio.value === value);
             bottomPeriodFilters.forEach(radio => radio.checked = radio.value === value);
@@ -447,12 +442,17 @@
             actionsWrapper.style.display = 'none';
             parametersSection.style.display = 'none';
             chartDisclaimer.style.display = 'none';
-            instructionBox.style.display = 'block';
+            instructionBox.style.display = 'block'; // Mostra a caixa de instruções novamente
             fullResults = [];
             setInitialDateAndFooter();
             valorInvestimentoInput.focus();
         });
         document.getElementById('imprimirBtn').addEventListener('click', () => window.print());
+
+        // --- CÓDIGO INALTERADO PARA SIMPLICIDADE ---
+        // Funções de atualização dos parâmetros
+        updateParametersDisplay = function(date) { let content = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Taxas de Ativos</h4><table class="min-w-full text-sm">`; investimentos.forEach(inv => { const volatility = getVolatilityFactor(date, inv.tipo); const adjustedRate = inv.rendimentoBrutoAnual * volatility; content += `<tr><td class="p-1 font-medium">${inv.nome}</td><td class="p-1 text-right">${formatVolatility(volatility)}</td><td class="p-1 text-right font-bold">${formatPercent(adjustedRate)}</td></tr>`; }); content += '</table>'; infoParametersTableContainer.innerHTML = content; }
+        setInitialDateAndFooter = function() { const today = new Date(); manualDateInput.value = today.toISOString().split('T')[0]; dateDisplay.innerHTML = `Cenário de hoje, <strong>${formatDate(today)}</strong>. Preencha os campos para simular.`; }
     </script>
 </body>
 </html>
