@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Investimentos PRO (v2)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .error-message { color: #dc2626; display: none; margin-top: 0.5rem; }
+        .period-selector input:checked + label { background-color: #2563eb; color: white; }
+        @media print {
+            .no-print { display: none; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            #chart-container { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-700">Calculadora de Investimentos PRO</h1>
+            <p class="mt-2 text-lg text-gray-600">Projete seus investimentos a longo prazo e entenda seu ganho real.</p>
+            <div id="date-display" class="mt-4 text-sm text-gray-500 bg-gray-200 p-2 rounded-lg inline-block"></div>
+        </header>
+
+        <main>
+            <!-- Seção de Entrada de Dados e Parâmetros -->
+            <div class="input-section bg-white p-6 rounded-lg shadow-md mb-8 no-print">
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <!-- Coluna de Entradas -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="valorInvestimento" class="block text-lg font-medium text-gray-700 mb-2">Valor Inicial:</label>
+                            <input type="text" id="valorInvestimento" placeholder="R$ 1.000,00" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                             <label for="manualDate" class="block text-lg font-medium text-gray-700 mb-2">Data do Cenário:</label>
+                             <input type="date" id="manualDate" class="w-full p-3 text-lg border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-lg font-medium text-gray-700 mb-2">Período da Projeção:</label>
+                            <div class="period-selector grid grid-cols-4 gap-2 text-center">
+                                <input type="radio" name="period" id="p1" value="1" class="sr-only" checked><label for="p1" class="p-3 border rounded-lg cursor-pointer transition">1 Ano</label>
+                                <input type="radio" name="period" id="p5" value="5" class="sr-only"><label for="p5" class="p-3 border rounded-lg cursor-pointer transition">5 Anos</label>
+                                <input type="radio" name="period" id="p10" value="10" class="sr-only"><label for="p10" class="p-3 border rounded-lg cursor-pointer transition">10 Anos</label>
+                                <input type="radio" name="period" id="p20" value="20" class="sr-only"><label for="p20" class="p-3 border rounded-lg cursor-pointer transition">20 Anos</label>
+                            </div>
+                        </div>
+                        <button id="calcularBtn" class="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center transition-all">
+                            <span id="btn-text">Calcular Projeção</span>
+                            <svg id="btn-loader" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                        <p id="errorMessage" class="error-message font-medium text-center"></p>
+                    </div>
+
+                    <!-- Coluna de Parâmetros -->
+                    <div id="parameters-section" class="space-y-4" style="display: none;">
+                        <h3 class="text-xl font-bold text-center text-gray-700">Cenário de Mercado Simulado</h3>
+                        <div id="infoParametersTableContainer" class="overflow-x-auto bg-gray-50 p-3 rounded-lg border"></div>
+                        <div id="currency-display" class="bg-gray-50 p-3 rounded-lg border"></div>
+                        <div id="news-ticker" class="bg-gray-50 p-3 rounded-lg border"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Resultados -->
+            <div id="results-wrapper" style="display: none;">
+                <h2 id="printableTitle" class="text-2xl font-bold text-center mb-6">Resultados da Simulação</h2>
+                <div class="overflow-x-auto">
+                    <table id="resultsTable" class="min-w-full bg-white rounded-lg shadow-lg">
+                       <thead class="bg-gray-200">
+                            <tr>
+                                <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Investimento</th>
+                                <th class="p-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Projeção Final</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                 <!-- Gráfico -->
+                <div id="chart-container" class="bg-white p-4 rounded-lg shadow-lg mt-8">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            <div id="actions-wrapper" class="text-center mt-8 no-print" style="display: none;">
+                <button id="imprimirBtn" class="py-3 px-6 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700">Imprimir</button>
+                <button id="recalcularBtn" class="ml-2 py-3 px-6 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700">Calcular Outro Valor</button>
+            </div>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="mt-12 pt-6 border-t border-gray-300 text-center no-print">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <svg width="60" height="60" viewBox="0 0 100 100" class="rounded-full bg-blue-700 p-2 text-white"><text x="50" y="68" font-size="50" font-weight="bold" text-anchor="middle" fill="currentColor">LM</text></svg>
+                <div>
+                    <p class="font-semibold text-lg text-gray-800">Luciano Montenegro</p>
+                    <p class="text-sm text-gray-600">em colaboração com a IA do Google para atualização dos dados e credibilidade do projeto</p>
+                    <a href="mailto:montenegroll@gmail.com" class="text-sm text-blue-600 hover:underline">montenegroll@gmail.com</a>
+                    <p id="footer-date" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+            </div>
+             <p class="text-xs text-gray-500 mt-6 text-center">
+                <strong>Aviso Legal:</strong> Esta é uma ferramenta de simulação educacional. Rentabilidade passada não é garantia de rentabilidade futura. Consulte um profissional.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // --- INÍCIO DO CÓDIGO JAVASCRIPT ---
+        const investimentos = [
+            { nome: "Tesouro Selic", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.105, aliquotaIR: 0.15 },
+            { nome: "CDB (110% do CDI)", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.115, aliquotaIR: 0.15 },
+            { nome: "LCI / LCA", tipo: "Renda Fixa", rendimentoBrutoAnual: 0.095, aliquotaIR: 0.0 },
+            { nome: "Ações (Índice Bovespa)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.15, aliquotaIR: 0.15 },
+            { nome: "Fundos Imobiliários (FIIs)", tipo: "Renda Variável", rendimentoBrutoAnual: 0.12, aliquotaIR: 0.15 } // IR de 15% sobre ganho de capital na venda. Rendimentos são isentos. Simplificação.
+        ];
+
+        // Mapeamento de DOM
+        const valorInvestimentoInput = document.getElementById('valorInvestimento');
+        const manualDateInput = document.getElementById('manualDate');
+        const calcularBtn = document.getElementById('calcularBtn');
+        const tableBody = document.querySelector('#resultsTable tbody');
+        const errorMessage = document.getElementById('errorMessage');
+        const dateDisplay = document.getElementById('date-display');
+        const parametersSection = document.getElementById('parameters-section');
+        const infoParametersTableContainer = document.getElementById('infoParametersTableContainer');
+        const currencyDisplay = document.getElementById('currency-display');
+        const newsTicker = document.getElementById('news-ticker');
+        const resultsWrapper = document.getElementById('results-wrapper');
+        const actionsWrapper = document.getElementById('actions-wrapper');
+        const chartCanvas = document.getElementById('resultsChart');
+        let resultsChartInstance = null;
+        
+        // Funções de formatação
+        const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatDate = (date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formatPercent = (value) => `${(value * 100).toFixed(2)}%`.replace('.',',');
+        const formatVolatility = (value) => {
+            const percent = (value - 1) * 100;
+            const sign = percent >= 0 ? '+' : '';
+            const color = percent >= 0 ? 'text-green-600' : 'text-red-600';
+            return `<span class="${color}">${sign}${percent.toFixed(2).replace('.',',')}%</span>`;
+        };
+
+        const formatInputAsCurrency = (value) => {
+            if (!value) return "";
+            let num = value.replace(/\D/g, '');
+            if (num === "") return "";
+            num = (parseInt(num, 10) / 100).toFixed(2);
+            let [integer, decimals] = num.split('.');
+            integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return `R$ ${integer},${decimals}`;
+        };
+        const unformatCurrency = (value) => parseFloat(value.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+        
+        // Funções de Simulação
+        const getSeededRandom = (seed) => parseFloat('0.' + Math.sin(seed).toString().substr(6));
+        function getVolatilityFactor(date, tipo) {
+            const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate() + tipo.length;
+            return 1 + (getSeededRandom(seed) - 0.5) * (tipo === 'Renda Fixa' ? 0.04 : 0.30);
+        }
+        function getSimulatedInflation(date) {
+            const seed = date.getFullYear() + date.getMonth();
+            const random = getSeededRandom(seed);
+            const baseInflation = 0.035; // 3.5%
+            const range = 0.05; // Variação de 5 p.p (de 3.5% a 8.5%)
+            return baseInflation + (random * range);
+        }
+
+        // Funções de Display de Parâmetros
+        function updateParametersDisplay(date) {
+            let content = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Taxas de Ativos</h4><table class="min-w-full text-sm">`;
+            investimentos.forEach(inv => {
+                const volatility = getVolatilityFactor(date, inv.tipo);
+                const adjustedRate = inv.rendimentoBrutoAnual * volatility;
+                content += `<tr><td class="p-1 font-medium">${inv.nome}</td><td class="p-1 text-right">${formatVolatility(volatility)}</td><td class="p-1 text-right font-bold">${formatPercent(adjustedRate)}</td></tr>`;
+            });
+            content += '</table>';
+            infoParametersTableContainer.innerHTML = content;
+        }
+        function updateCurrenciesDisplay(date) {
+            const seed = date.getDate() * 100 + date.getMonth();
+            const usdRate = 5.25 * (1 + (getSeededRandom(seed + 1) - 0.5) * 0.05);
+            const eurRate = 5.65 * (1 + (getSeededRandom(seed + 2) - 0.5) * 0.05);
+            const inflation = getSimulatedInflation(date);
+            currencyDisplay.innerHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Indicadores do Dia</h4><div class="space-y-1 text-sm">
+                <div class="flex justify-between"><span><strong>Dólar:</strong></span> <span>R$ ${usdRate.toFixed(2).replace('.',',')}</span></div>
+                <div class="flex justify-between"><span><strong>Euro:</strong></span> <span>R$ ${eurRate.toFixed(2).replace('.',',')}</span></div>
+                <div class="flex justify-between"><span><strong>Inflação (anual simulada):</strong></span> <span class="font-bold">${formatPercent(inflation)}</span></div>
+            </div>`;
+        }
+        function updateNewsTicker(date) {
+            const exchanges = ["IBOVESPA", "NASDAQ", "S&P 500"];
+            let newsHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Mercado Hoje</h4><ul class="space-y-1 text-sm">`;
+            exchanges.forEach((ex, index) => {
+                const change = (getSeededRandom(date.getDate() + index) - 0.5) * 4;
+                newsHTML += `<li class="flex justify-between items-center"><span><strong>${ex}:</strong></span> ${formatVolatility(1 + change / 100)}</li>`;
+            });
+            newsHTML += `</ul>`;
+            newsTicker.innerHTML = newsHTML;
+        }
+        function updateAllParameters(date) {
+            updateParametersDisplay(date);
+            updateCurrenciesDisplay(date);
+            updateNewsTicker(date);
+            parametersSection.style.display = 'block';
+        }
+
+        // Função Principal de Cálculo
+        async function calcularInvestimentos() {
+            const valorInicial = unformatCurrency(valorInvestimentoInput.value);
+            const anos = parseInt(document.querySelector('input[name="period"]:checked').value);
+
+            if (valorInicial <= 0) {
+                errorMessage.textContent = "Por favor, insira um valor de investimento válido.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Ativar estado de loading
+            errorMessage.style.display = 'none';
+            document.getElementById('btn-text').classList.add('hidden');
+            document.getElementById('btn-loader').classList.remove('hidden');
+            calcularBtn.disabled = true;
+
+            await new Promise(resolve => setTimeout(resolve, 300)); // Simula processamento
+
+            tableBody.innerHTML = '';
+            const calculationDate = manualDateInput.value ? new Date(manualDateInput.value + 'T00:00:00') : new Date();
+            const inflacaoAnual = getSimulatedInflation(calculationDate);
+            
+            dateDisplay.innerHTML = `Cenário simulado para: <strong>${formatDate(calculationDate)}</strong>`;
+            document.getElementById('printableTitle').innerHTML = `Resultados da Simulação para ${anos} ano(s)`;
+            updateAllParameters(calculationDate);
+            
+            const chartLabels = [];
+            const chartDataNominal = [];
+            const chartDataReal = [];
+
+            investimentos.forEach(inv => {
+                const volatility = getVolatilityFactor(calculationDate, inv.tipo);
+                const taxaBrutaAnual = inv.rendimentoBrutoAnual * volatility;
+                const taxaLiquidaAnual = taxaBrutaAnual * (1 - inv.aliquotaIR);
+                
+                // Juros Compostos
+                const valorFinalNominal = valorInicial * Math.pow(1 + taxaLiquidaAnual, anos);
+                const jurosTotais = valorFinalNominal - valorInicial;
+
+                // Cálculo do valor real descontando a inflação
+                const valorFinalReal = valorFinalNominal / Math.pow(1 + inflacaoAnual, anos);
+
+                // Adicionar dados para o gráfico
+                chartLabels.push(inv.nome);
+                chartDataNominal.push(valorFinalNominal.toFixed(2));
+                chartDataReal.push(valorFinalReal.toFixed(2));
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="p-4 align-top">
+                        <div class="font-bold text-gray-800">${inv.nome}</div>
+                        <div class="text-sm text-gray-500">${inv.tipo}</div>
+                    </td>
+                    <td class="p-4 text-sm align-top">
+                        <div class="grid grid-cols-[auto_1fr] gap-x-2">
+                            <span class="font-semibold">Valor Final (Nominal):</span> <span class="text-right font-bold text-blue-700">${formatCurrency(valorFinalNominal)}</span>
+                            <span class="font-semibold">Valor Final (Real):</span> <span class="text-right font-bold text-green-700">${formatCurrency(valorFinalReal)}</span>
+                            <span class="font-semibold text-gray-600">Total Juros (Líquido):</span> <span class="text-right text-gray-600">${formatCurrency(jurosTotais)}</span>
+                            <span class="font-semibold text-gray-600">Taxa Líquida Anual:</span> <span class="text-right text-gray-600">${formatPercent(taxaLiquidaAnual)}</span>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            renderChart(chartLabels, chartDataNominal, chartDataReal);
+            resultsWrapper.style.display = 'block';
+            actionsWrapper.style.display = 'block';
+
+            // Desativar estado de loading
+            document.getElementById('btn-text').classList.remove('hidden');
+            document.getElementById('btn-loader').classList.add('hidden');
+            calcularBtn.disabled = false;
+        }
+        
+        function renderChart(labels, nominalData, realData) {
+            if (resultsChartInstance) {
+                resultsChartInstance.destroy();
+            }
+            const ctx = chartCanvas.getContext('2d');
+            resultsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Valor Final Real (descontada a inflação)',
+                            data: realData,
+                            backgroundColor: 'rgba(22, 163, 74, 0.7)', // green-600
+                            borderColor: 'rgba(22, 163, 74, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Valor Final Nominal',
+                            data: nominalData,
+                            backgroundColor: 'rgba(29, 78, 216, 0.7)', // blue-700
+                            borderColor: 'rgba(29, 78, 216, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Comparativo de Crescimento do Patrimônio' },
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${formatCurrency(parseFloat(context.raw))}` } }
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (value) => formatCurrency(value) } } }
+                }
+            });
+        }
+
+        // Inicialização e Eventos
+        function setInitialDateAndFooter() {
+            const today = new Date();
+            manualDateInput.value = today.toISOString().split('T')[0];
+            dateDisplay.innerHTML = `Cenário de hoje, <strong>${formatDate(today)}</strong>. Preencha os campos para simular.`;
+            document.getElementById('footer-date').textContent = `© ${today.getFullYear()}`;
+        }
+        
+        window.onload = setInitialDateAndFooter;
+
+        valorInvestimentoInput.addEventListener('input', (e) => e.target.value = formatInputAsCurrency(e.target.value));
+        manualDateInput.addEventListener('input', (e) => {
+            const dateStr = e.target.value;
+            if (dateStr) {
+                const selectedDate = new Date(dateStr + 'T00:00:00');
+                updateAllParameters(selectedDate);
+                dateDisplay.innerHTML = `Cenário simulado para: <strong>${formatDate(selectedDate)}</strong>`;
+            } else {
+                parametersSection.style.display = 'none';
+                setInitialDateAndFooter();
+            }
+        });
+        
+        calcularBtn.addEventListener('click', calcularInvestimentos);
+        document.getElementById('recalcularBtn').addEventListener('click', () => {
+            valorInvestimentoInput.value = '';
+            resultsWrapper.style.display = 'none';
+            actionsWrapper.style.display = 'none';
+            parametersSection.style.display = 'none';
+            setInitialDateAndFooter();
+            valorInvestimentoInput.focus();
+        });
+        document.getElementById('imprimirBtn').addEventListener('click', () => window.print());
+    </script>
+</body>
+</html>
