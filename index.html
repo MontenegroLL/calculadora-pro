@@ -209,8 +209,40 @@
 
         // Funções de Display de Parâmetros
         function updateParametersDisplay(date) { /* ...código inalterado... */ }
-        function updateCurrenciesDisplay(date) { /* ...código inalterado... */ }
-        function updateNewsTicker(date) { /* ...código inalterado... */ }
+        function updateCurrenciesDisplay(date) {
+            const seed = date.getDate() * 100 + date.getMonth();
+            const currencies = [
+                { name: 'Dólar (USD)', baseRate: 5.25, seedOffset: 1 },
+                { name: 'Euro (EUR)', baseRate: 5.65, seedOffset: 2 },
+                { name: 'Libra (GBP)', baseRate: 6.65, seedOffset: 3 },
+                { name: 'Iene (JPY)', baseRate: 0.033, seedOffset: 4 },
+                { name: 'Yuan (CNY)', baseRate: 0.72, seedOffset: 5 },
+                { name: 'Franco Suíço (CHF)', baseRate: 5.80, seedOffset: 6 },
+            ];
+            
+            let currencyHTML = `<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">`;
+            currencies.forEach(currency => {
+                const rate = currency.baseRate * (1 + (getSeededRandom(seed + currency.seedOffset) - 0.5) * 0.05);
+                currencyHTML += `<div class="flex justify-between"><span><strong>${currency.name}:</strong></span> <span>R$ ${rate.toFixed(2).replace('.',',')}</span></div>`;
+            });
+            currencyHTML += '</div>';
+
+            const inflation = getSimulatedInflation(date);
+            currencyDisplay.innerHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Indicadores do Dia</h4>
+                ${currencyHTML}
+                <div class="flex justify-between text-sm mt-2 pt-1 border-t"><span><strong>Inflação (anual simulada):</strong></span> <span class="font-bold">${formatPercent(inflation)}</span></div>
+            `;
+        }
+        function updateNewsTicker(date) {
+            const exchanges = ["IBOVESPA", "S&P 500", "NASDAQ", "DAX (Alemanha)", "FTSE 100 (UK)", "Hang Seng (HK)"];
+            let newsHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Mercados Globais</h4><ul class="space-y-1 text-sm">`;
+            exchanges.forEach((ex, index) => {
+                const change = (getSeededRandom(date.getDate() + index) - 0.5) * 4;
+                newsHTML += `<li class="flex justify-between items-center"><span><strong>${ex}:</strong></span> ${formatVolatility(1 + change / 100)}</li>`;
+            });
+            newsHTML += `</ul>`;
+            newsTicker.innerHTML = newsHTML;
+        }
         function updateAllParameters(date) {
             updateParametersDisplay(date);
             updateCurrenciesDisplay(date);
@@ -415,9 +447,6 @@
         // --- CÓDIGO INALTERADO PARA SIMPLICIDADE ---
         // Funções de atualização dos parâmetros
         updateParametersDisplay = function(date) { let content = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Taxas de Ativos</h4><table class="min-w-full text-sm">`; investimentos.forEach(inv => { const volatility = getVolatilityFactor(date, inv.tipo); const adjustedRate = inv.rendimentoBrutoAnual * volatility; content += `<tr><td class="p-1 font-medium">${inv.nome}</td><td class="p-1 text-right">${formatVolatility(volatility)}</td><td class="p-1 text-right font-bold">${formatPercent(adjustedRate)}</td></tr>`; }); content += '</table>'; infoParametersTableContainer.innerHTML = content; }
-        updateCurrenciesDisplay = function(date) { const seed = date.getDate() * 100 + date.getMonth(); const usdRate = 5.25 * (1 + (getSeededRandom(seed + 1) - 0.5) * 0.05); const eurRate = 5.65 * (1 + (getSeededRandom(seed + 2) - 0.5) * 0.05); const inflation = getSimulatedInflation(date); currencyDisplay.innerHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Indicadores do Dia</h4><div class="space-y-1 text-sm"><div class="flex justify-between"><span><strong>Dólar:</strong></span> <span>R$ ${usdRate.toFixed(2).replace('.',',')}</span></div><div class="flex justify-between"><span><strong>Euro:</strong></span> <span>R$ ${eurRate.toFixed(2).replace('.',',')}</span></div><div class="flex justify-between"><span><strong>Inflação (anual simulada):</strong></span> <span class="font-bold">${formatPercent(inflation)}</span></div></div>`; }
-        updateNewsTicker = function(date) { const exchanges = ["IBOVESPA", "NASDAQ", "S&P 500"]; let newsHTML = `<h4 class="font-semibold text-gray-700 mb-2 text-center">Mercado Hoje</h4><ul class="space-y-1 text-sm">`; exchanges.forEach((ex, index) => { const change = (getSeededRandom(date.getDate() + index) - 0.5) * 4; newsHTML += `<li class="flex justify-between items-center"><span><strong>${ex}:</strong></span> ${formatVolatility(1 + change / 100)}</li>`; }); newsHTML += `</ul>`; newsTicker.innerHTML = newsHTML; }
-        // Funções de inicialização
         setInitialDateAndFooter = function() { const today = new Date(); manualDateInput.value = today.toISOString().split('T')[0]; dateDisplay.innerHTML = `Cenário de hoje, <strong>${formatDate(today)}</strong>. Preencha os campos para simular.`; }
     </script>
 </body>
